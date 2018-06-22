@@ -1,17 +1,26 @@
 const path = require('path')
 
 const express = require('express')
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
 let config = require ('./config/development')
 
 const app = express()
 
-app.post('/rating', function (req, res) {
-    let userId = req.body.userId
-    let contentId = req.body.contentId
-    let rating = req.body.rating
+app.use(bodyParser.json())
+app.use(cors())
 
-    console.log(userId + contentId + rating)
+app.post('/rating', function (req, res) {
+    let userId = req.query.userId
+    let contentId = req.query.contentId
+    let rating = req.query.rating
+
+    console.log(userId)
+    console.log(contentId)
+    console.log(rating)
+    
+    
 })
 
 app.get('/rating/:contentId', function (req, res) {
