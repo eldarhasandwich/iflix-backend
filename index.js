@@ -16,15 +16,16 @@ app.post('/rating', function (req, res) {
     let contentId = req.query.contentId
     let rating = req.query.rating
 
-    console.log(userId)
-    console.log(contentId)
-    console.log(rating)
+    console.log("POST content rate request from user " + userId + " for content " + contentId + " (" + rating + " stars)")
     
-    
+    res.json({
+        response: "success"
+    })
+
 })
 
 app.get('/rating/:contentId', function (req, res) {
-    console.log(req.params.contentId)
+    console.log("GET average rating for " + req.params.contentId)
     res.json({
             contentId: req.params.contentId,
             average: 3.2
