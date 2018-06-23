@@ -1,10 +1,12 @@
 const path = require('path')
 
 const express = require('express')
+const router = express.Router()
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
-let config = require ('./config/development')
+let db = require('./queries')
+let config = require('./config/development')
 
 const app = express()
 
@@ -16,7 +18,7 @@ app.post('/rating', function (req, res) {
     let contentId = req.query.contentId
     let rating = req.query.rating
 
-    console.log("POST content rate request from user " + userId + " for content " + contentId + " (" + rating + " stars)")
+    console.log(`POST content rate request from user ${userId} for content ${contentId} (${rating} stars)`)
     
     res.json({
         response: "success"
@@ -25,11 +27,13 @@ app.post('/rating', function (req, res) {
 })
 
 app.get('/rating/:contentId', function (req, res) {
-    console.log("GET average rating for " + req.params.contentId)
+    let contentId = req.params.contentId
+
+    console.log(`GET average rating for ${contentId}`)
     res.json({
-            contentId: req.params.contentId,
-            average: 3.2
-        })
+        contentId: contentId,
+        average: 3.2
+    })
 })
 
 app.listen(config.app.port, function (err) {
