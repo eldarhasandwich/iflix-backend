@@ -5,14 +5,14 @@ const options = {
 }
 
 const pgp = require('pg-promise')(options)
-const connectionString = 'postgres://localhost:5432'
+const connectionString = 'postgres://localhost:5432/ratings'
 const db = pgp(connectionString)
 
 function postRating(user_ID, content_ID, rating) {
 
 }
 
-function getContentAverageRating (content_ID) {
+function getContentAverageRating (req, res, next) {
     db.one('select * from contents where ID = $1', content_ID)
         .then(function(data) {
             res.status(200)
