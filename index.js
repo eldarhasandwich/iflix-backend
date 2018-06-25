@@ -1,23 +1,16 @@
 
+const path = require('path');
+const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors')
-
-
-const express = require('express');
-// const router = express.Router();
 const { Pool, Client } = require('pg');
-const path = require('path');
-const connectionString = 'postgres://localhost:5432';
 
 let config = require('./config/development')
+let connectionString = 'postgresql://eldarhasandwich:password@localhost:5432/ratings'
 
-const pool = new Pool({
-    user: 'eldarhasandwich',
-    host: connectionString,
-    database: 'ratings',
-    password: 'password',
-    port: 5432
-})
+const pool = new Pool(connectionString)
+const client = new Client(connectionString);
+client.connect();
 
 const app = express()
 app.use(bodyParser.json())
@@ -25,12 +18,15 @@ app.use(cors())
 
 app.get('/login/:userId', function (req, res, next) {
     let result = null
-    let userId = req.params.userId
+    let userId = parseInt(req.params.userId)
+
+    console.log(`GET login attempt, userID: ${userId}`)
 
     if (userId === 1 || userId === 2 || userId === 3) {
         result = userId
     }
 
+    res.status((result) ? 200: 404)
     res.json({
         response: (result) ? "success" : "failure",
         userId: result
@@ -56,17 +52,14 @@ app.post('/rating', function (req, res, next) {
     pool.query(queryString, (err, result) => {
             if (err) {
                 console.log(err)
+                res.status(200)
                 res.json({response: "failure"})
             } else {
+                res.status(404)
                 res.json({response: "success"})
             }
         }
     )
-
-    // res.json({
-    //     response: "success"
-    // })
-
 })
 
 // GET
@@ -77,16 +70,20 @@ app.get('/rating/:contentId', function (req, res, next) {
 
     console.log(`GET average rating for ${contentId}`)
 
-
+    res.json(200)
     res.json({
+        response: "success",
         contentId: contentId,
         average: 3.2
     })
+
+
 })
 
-app.get('/rating/list', function (req, res, next) {
+app.get('/content', function (req, res, next) {
+    res.status(200)
     res.json({
-        list: [
+        content: [
             {
                 title: "Titanic",
                 average: 4
@@ -104,10 +101,7 @@ app.get('/rating/list', function (req, res, next) {
 })
 
 app.listen(config.app.port, function (err) {
-    if (err) {
-        throw err
-    }
-
+    if (err) { throw err }
     console.log(`Listening on port ${config.app.port}`)
 })
 

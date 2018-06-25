@@ -1,5 +1,5 @@
 const pg = require('pg');
-const connectionString = 'postgres://localhost:5432';
+const connectionString = 'postgres://localhost:5432/ratings';
 
 const client = new pg.Client(connectionString);
 client.connect();
