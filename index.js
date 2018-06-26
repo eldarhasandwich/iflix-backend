@@ -17,7 +17,6 @@ app.use(bodyParser.json())
 app.use(cors())
 
 app.get('/login/:userId', function (req, res, next) {
-    let result = null
     let userId = parseInt(req.params.userId)
 
     console.log(`GET login attempt, userID: ${userId}`)
@@ -34,7 +33,6 @@ app.get('/login/:userId', function (req, res, next) {
                 userId: null
             })
         } else {
-            console.log(result)
             res.status(200)
             res.json({
                 response: "success",
@@ -81,14 +79,26 @@ app.get('/rating/:contentId', function (req, res, next) {
 
     console.log(`GET average rating for ${contentId}`)
 
-    res.status(200)
-    res.json({
-        response: "success",
-        contentId: contentId,
-        average: 3.2
+    let queryString = `
+        SELECT * FROM contents WHERE id = ${contentId}
+    `
+
+    pool.query(queryString, (err, result) => {
+        if (err) {
+            console.log(err)
+            res.status(404)
+            res.json({
+                response: "failure"
+            })
+        } else {
+            res.status(200)
+            res.json({
+                response: "success",
+                contentId: result.rows[0].id,
+                rating: result.rows[0].average_rating
+            })
+        }
     })
-
-
 })
 
 app.get('/content', function (req, res, next) {
@@ -98,7 +108,7 @@ app.get('/content', function (req, res, next) {
     let queryString = `
         SELECT * FROM contents;
     `
-    
+
     pool.query(queryString, (err, result) => {
         if (err) {
             console.log(err)
