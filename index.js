@@ -23,7 +23,7 @@ app.get('/login/:userId', function (req, res, next) {
     console.log(`GET login attempt, userID: ${userId}`)
 
     let queryString = `
-        SELECT * FROM users WHERE id = ${userId}
+        SELECT * FROM users WHERE id = ${userId};
     `
     pool.query(queryString, (err, result) => {
         if (err) {
@@ -95,22 +95,25 @@ app.get('/content', function (req, res, next) {
 
     console.log(`GET list of content`)
 
-    res.status(200)
-    res.json({
-        content: [
-            {
-                title: "Titanic",
-                average: 4
-            },
-            {
-                title: "The Avengers",
-                average: 4
-            },
-            {
-                title: "Star Wars IV",
-                average: 4
-            }
-        ]
+    let queryString = `
+        SELECT * FROM contents;
+    `
+    
+    pool.query(queryString, (err, result) => {
+        if (err) {
+            console.log(err)
+            res.status(404)
+        } else {
+            res.status(200)
+            res.json({
+                content: result.rows.map(row => {
+                    return {
+                        title: row.title,
+                        average: row.average_rating
+                    }
+                })
+            })
+        }
     })
 })
 
