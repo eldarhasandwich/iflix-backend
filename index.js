@@ -22,14 +22,25 @@ app.get('/login/:userId', function (req, res, next) {
 
     console.log(`GET login attempt, userID: ${userId}`)
 
-    if (userId === 1 || userId === 2 || userId === 3) {
-        result = userId
-    }
-
-    res.status((result) ? 200: 404)
-    res.json({
-        response: (result) ? "success" : "failure",
-        userId: result
+    let queryString = `
+        SELECT * FROM users WHERE id = ${userId}
+    `
+    pool.query(queryString, (err, result) => {
+        if (err) {
+            console.log(err)
+            res.status(404)
+            res.json({
+                response: "failure",
+                userId: null
+            })
+        } else {
+            console.log(result)
+            res.status(200)
+            res.json({
+                response: "success",
+                userId: result.rows[0].id
+            })
+        }
     })
 })
 
@@ -51,16 +62,15 @@ app.post('/rating', function (req, res, next) {
     `
 
     pool.query(queryString, (err, result) => {
-            if (err) {
-                console.log(err)
-                res.status(404)
-                res.json({response: "failure"})
-            } else {
-                res.status(200)
-                res.json({response: "success"})
-            }
+        if (err) {
+            console.log(err)
+            res.status(404)
+            res.json({response: "failure"})
+        } else {
+            res.status(200)
+            res.json({response: "success"})
         }
-    )
+    })
 })
 
 // GET
