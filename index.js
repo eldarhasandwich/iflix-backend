@@ -46,16 +46,17 @@ app.post('/rating', function (req, res, next) {
     console.log(`POST content rate request from user ${data.userId} for content ${data.contentId} (${data.rating} stars)`)
 
     let queryString = `
-        INSERT INTO ratings(id, user_ID, contentID, rating)
-        VALUES (${1}, ${data.userId}, ${data.contentId}, ${data.rating})`
+        INSERT INTO ratings(user_ID, content_ID, rating)
+        VALUES (${data.userId}, ${data.contentId}, ${data.rating})
+    `
 
     pool.query(queryString, (err, result) => {
             if (err) {
                 console.log(err)
-                res.status(200)
+                res.status(404)
                 res.json({response: "failure"})
             } else {
-                res.status(404)
+                res.status(200)
                 res.json({response: "success"})
             }
         }
@@ -70,7 +71,7 @@ app.get('/rating/:contentId', function (req, res, next) {
 
     console.log(`GET average rating for ${contentId}`)
 
-    res.json(200)
+    res.status(200)
     res.json({
         response: "success",
         contentId: contentId,
@@ -81,6 +82,9 @@ app.get('/rating/:contentId', function (req, res, next) {
 })
 
 app.get('/content', function (req, res, next) {
+
+    console.log(`GET list of content`)
+
     res.status(200)
     res.json({
         content: [
