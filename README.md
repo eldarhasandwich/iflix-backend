@@ -5,6 +5,9 @@
 - Run: `npm start`
 
 ## Logging in
+
+Allow a user to confirm their login details with the API.
+
 - URL: `/login/:userId`
 - Method: `GET`
 - URL Params: 
@@ -25,6 +28,9 @@
     ```
 
 ## Post Rating
+
+Allow a user to post a rating of a certain content.
+
 - URL: `/rating`
 - Method: `POST`
 - Data Params:
@@ -52,6 +58,9 @@
     ```
 
 ## Access Content Average Rating
+
+Allow a user to pull the average rating of a single content by its ID.
+
 - URL: `/rating/:contentId`
 - Method: `GET`
 - URL params: 
@@ -72,6 +81,9 @@
     ```
 
 ## Access Content
+
+Returns a list of all content in the servers database.
+
 - URL: `/content`
 - Method: `GET`
 - Success Response:
