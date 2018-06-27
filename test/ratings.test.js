@@ -1,9 +1,8 @@
-
 process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
 const ratings = require('../lib/ratings')
-const { pool } = require('../index')
+const {pool} = require('../index')
 
 let should = chai.should()
 
@@ -15,25 +14,29 @@ describe('Rating Utils', () => {
             let initialAverage = null
             pool.query(`SELECT average_rating FROM contents WHERE id = 2`, (err, res) => {
                 if (err) {
-                    //
+                    expect(false, `Couldn't get average_rating of contentId: 2, check testdb schema`).to.be.ok;
                 } else {
 
                     initialAverage = res.rows[0].average_rating
-                    initialAverage.should.eql(3)
+                    initialAverage
+                        .should
+                        .eql(3)
                     pool.query(`
                         INSERT INTO ratings (user_ID, content_ID, rating) VALUES (1, 2, 5);
                         INSERT INTO ratings (user_ID, content_ID, rating) VALUES (1, 2, 4);
                     `, (err, res) => {
                         if (err) {
-                            //
+                            expect(false, `Couldn't insert tuples into table: ratings, check testdb schema`).to.be.ok;
                         } else {
                             ratings.updateContentAverageRating(pool, 2)
-                            setTimeout(()=>{
+                            setTimeout(() => {
                                 pool.query(`SELECT average_rating FROM contents WHERE id = 2`, (err, res) => {
                                     if (err) {
-                                        //
+                                        expect(false, `Couldn't get average_rating of contentId: 2, check testdb schema`).to.be.ok;
                                     } else {
-                                        (res.rows[0].average_rating).should.eql(3.75)
+                                        (res.rows[0].average_rating)
+                                            .should
+                                            .eql(3.75)
                                         done()
                                     }
                                 })
@@ -45,4 +48,3 @@ describe('Rating Utils', () => {
         })
     })
 })
-
