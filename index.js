@@ -5,34 +5,40 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const { Pool, Client } = require('pg');
 
+const rating = require('./lib/ratings')
+const utils = require('./lib/utils')
 let config = require('./config/development')
-let connectionString = 'postgresql://eldarhasandwich:password@localhost:5432/ratings'
 
+// Database connection
+let connectionString = 'localhost:5432'
 const pool = new Pool(connectionString)
-const client = new Client(connectionString);
-client.connect();
 
 const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 
+/*
+    GET /login/:userId
+    Confirm existence of a user
+*/
 app.get('/login/:userId', function (req, res, next) {
     let userId = parseInt(req.params.userId)
 
-    console.log(`GET login attempt, userID: ${userId}`)
+    utils.log(`GET login attempt, userID: ${userId}`)
 
     let queryString = `
         SELECT * FROM users WHERE id = ${userId};
     `
     pool.query(queryString, (err, result) => {
-        if (err) {
-            console.log(err)
+        if (err || result.rows.length === 0) {
+            utils.log(err)
             res.status(404)
             res.json({
                 response: "failure",
                 userId: null
             })
         } else {
+            // return success response and userId
             res.status(200)
             res.json({
                 response: "success",
@@ -42,17 +48,20 @@ app.get('/login/:userId', function (req, res, next) {
     })
 })
 
-// POST
-// /rating
-// Create/update a rating of content by a user
+/*
+    POST /rating
+    Create a rating of content by a user
+*/
 app.post('/rating', function (req, res, next) {
-    let data = {
-        userId: req.query.userId,
-        contentId: req.query.contentId,
-        rating: req.query.rating
+    let data = req.query
+
+    if (![1,2,3,4,5].includes(parseInt(data.rating))) { // ensure rating is one of 1-5
+        res.status(400)
+        res.json({response: "failure"})
+        return
     }
 
-    console.log(`POST content rate request from user ${data.userId} for content ${data.contentId} (${data.rating} stars)`)
+    utils.log(`POST content rate request from user ${data.userId} for content ${data.contentId} (${data.rating} stars)`)
 
     let queryString = `
         INSERT INTO ratings(user_ID, content_ID, rating)
@@ -61,36 +70,42 @@ app.post('/rating', function (req, res, next) {
 
     pool.query(queryString, (err, result) => {
         if (err) {
-            console.log(err)
+            utils.log(err)
             res.status(404)
             res.json({response: "failure"})
         } else {
+            // update average rating of this content
+            rating.updateContentAverageRating(pool, data.contentId)
+
+            // return success response
             res.status(200)
             res.json({response: "success"})
         }
     })
 })
 
-// GET
-// /rating/:contentId
-// Retrieve a content's average rating by contentId
+/*
+    GET /rating/:contentId
+    Retrieve a content's average rating by contentId
+*/
 app.get('/rating/:contentId', function (req, res, next) {
     let contentId = req.params.contentId
 
-    console.log(`GET average rating for ${contentId}`)
+    utils.log(`GET average rating for ${contentId}`)
 
     let queryString = `
         SELECT * FROM contents WHERE id = ${contentId}
     `
 
     pool.query(queryString, (err, result) => {
-        if (err) {
-            console.log(err)
+        if (err || result.rows.length === 0) {
+            utils.log(err)
             res.status(404)
             res.json({
                 response: "failure"
             })
         } else {
+            // return success response along with contentId and rating
             res.status(200)
             res.json({
                 response: "success",
@@ -101,9 +116,13 @@ app.get('/rating/:contentId', function (req, res, next) {
     })
 })
 
+/*
+    GET /content
+    Retrieve list of content in the Database
+*/
 app.get('/content', function (req, res, next) {
 
-    console.log(`GET list of content`)
+    utils.log(`GET list of content`)
 
     let queryString = `
         SELECT * FROM contents;
@@ -111,13 +130,15 @@ app.get('/content', function (req, res, next) {
 
     pool.query(queryString, (err, result) => {
         if (err) {
-            console.log(err)
+            utils.log(err)
             res.status(404)
         } else {
+            // return array of content objects
             res.status(200)
             res.json({
                 content: result.rows.map(row => {
                     return {
+                        contentId: row.id,
                         title: row.title,
                         average: row.average_rating
                     }
@@ -129,6 +150,7 @@ app.get('/content', function (req, res, next) {
 
 app.listen(config.app.port, function (err) {
     if (err) { throw err }
-    console.log(`Listening on port ${config.app.port}`)
+    utils.log(`Listening on port ${config.app.port}`)
 })
 
+module.exports = { app, pool }

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "PGUSER=eldarhasandwich PGPASSWORD=password node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "PGUSER=eldarhasandwich PGPASSWORD=password PGDATABASE=ratings node index.js",
+    "test": "psql -f ratings.test.sql && PGUSER=eldarhasandwich PGPASSWORD=password PGDATABASE=ratings_test mocha --timeout 10000"
   },
   "author": "",
   "license": "ISC",
@@ -15,5 +15,10 @@
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "pg": "^5.2.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1",
+    "mocha": "^2.4.5"
   }
 }

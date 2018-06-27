@@ -1,5 +1,9 @@
 # Content Rating API Documentation
 
+- Install dependencies: `npm install`
+- Generate DB: `psql -f ratings.sql`
+- Run: `npm start`
+
 ## Logging in
 - URL: `/login/:userId`
 - Method: `GET`
@@ -77,8 +81,8 @@
         {
             response: "success",
             content: [
-                {title: "Movie", average: 3}, 
-                {title: "Movie 2", average: 4},
+                {contentId: 10, title: "Movie", average: 3}, 
+                {contentId: 7, title: "Movie 2", average: 4},
                 ...
             ]
         }

@@ -1,26 +1,13 @@
 
+-- drop RATINGS database and connect
 DROP DATABASE IF EXISTS ratings;
-DROP TABLE IF EXISTS users, contents, ratings CASCADE;
-
 CREATE DATABASE ratings;
+\c ratings;
 
-CREATE TABLE users (
-    ID SERIAL PRIMARY KEY
-);
+-- generate structure
+\i schema.sql;
 
-CREATE TABLE contents (
-    ID SERIAL PRIMARY KEY,
-    title VARCHAR,
-    average_rating FLOAT
-);
-
-CREATE TABLE ratings (
-    ID SERIAL PRIMARY KEY,
-    user_ID INT REFERENCES users(ID),
-    content_ID INT REFERENCES contents(ID),
-    rating INT
-);
-
+-- populate
 INSERT INTO users (ID) VALUES (1);
 INSERT INTO users (ID) VALUES (2);
 INSERT INTO users (ID) VALUES (3);
