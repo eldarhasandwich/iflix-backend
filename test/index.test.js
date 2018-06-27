@@ -69,6 +69,35 @@ describe('Backend Index', () => {
                     done();
                 })
         })
+        it('it should deny a userId that is not a number', done => {
+            chai
+                .request(app)
+                .get('/login/helloworld')
+                .end((err, res) => {
+                    res
+                        .should
+                        .have
+                        .status(404)
+                    res
+                        .body
+                        .should
+                        .be
+                        .a('object')
+                    res
+                        .body
+                        .should
+                        .have
+                        .property('response')
+                        .eql('failure')
+                    res
+                        .body
+                        .should
+                        .have
+                        .property('userId')
+                        .eql(null)
+                    done();
+                })
+        })
     })
 
     // POST /rating

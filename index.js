@@ -5,12 +5,10 @@ const cors = require('cors')
 const {Pool, Client} = require('pg');
 
 const rating = require('./lib/ratings')
-const utils = require('./lib/utils')
 let config = require('./config/development')
 
 // Database connection
-let connectionString = 'localhost:5432'
-const pool = new Pool(connectionString)
+const pool = new Pool(config.postgres[process.env.NODE_ENV || "development"])
 
 const app = express()
 app.use(bodyParser.json())
@@ -23,14 +21,21 @@ app.use(cors())
 app.get('/login/:userId', function (req, res, next) {
     let userId = parseInt(req.params.userId)
 
-    utils.log(`GET login attempt, userID: ${userId}`)
+    if (isNaN(userId)) {
+        console.error(`Supplied userId is not an integer.`)
+        res.status(404)
+        res.json({response: "failure", userId: null})
+        return
+    }
+
+    console.log(`GET login attempt, userID: ${userId}`)
 
     let queryString = `
         SELECT * FROM users WHERE id = ${userId};
     `
     pool.query(queryString, (err, result) => {
         if (err || result.rows.length === 0) {
-            console.error(err)
+            console.error(err || `No tuples returned by query`)
             res.status(404)
             res.json({response: "failure", userId: null})
             return
@@ -49,12 +54,13 @@ app.post('/rating', function (req, res, next) {
     let data = req.query
 
     if (![1, 2, 3, 4, 5].includes(parseInt(data.rating))) { // ensure rating is one of 1-5
+        console.error(`Rating was not in between 1 - 5 inclusive.`)
         res.status(400)
-        res.json({response: "failure"})
+        res.json({response: "failure", reason: `User rating was not between 1 - 5 inclusive`})
         return
     }
 
-    utils.log(`POST content rate request from user ${data.userId} for content ${data.contentId} (${data.rating} stars)`)
+    console.log(`POST content rate request from user ${data.userId} for content ${data.contentId} (${data.rating} stars)`)
 
     let queryString = `
         INSERT INTO ratings(user_ID, content_ID, rating)
@@ -84,7 +90,7 @@ app.post('/rating', function (req, res, next) {
 app.get('/rating/:contentId', function (req, res, next) {
     let contentId = req.params.contentId
 
-    utils.log(`GET average rating for ${contentId}`)
+    console.log(`GET average rating for ${contentId}`)
 
     let queryString = `
         SELECT * FROM contents WHERE id = ${contentId}
@@ -109,7 +115,7 @@ app.get('/rating/:contentId', function (req, res, next) {
 */
 app.get('/content', function (req, res, next) {
 
-    utils.log(`GET list of content`)
+    console.log(`GET list of content`)
 
     let queryString = `
         SELECT * FROM contents;
@@ -136,7 +142,7 @@ app.listen(config.app.port, function (err) {
     if (err) {
         throw err
     }
-    utils.log(`Listening on port ${config.app.port}`)
+    console.log(`Listening on port ${config.app.port}`)
 })
 
 module.exports = {

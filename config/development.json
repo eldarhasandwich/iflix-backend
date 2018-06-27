@@ -1,5 +1,17 @@
 {
     "app": {
         "port": 3004
+    },
+    "postgres": {
+        "development": {
+            "host": "localhost",
+            "database": "ratings",
+            "port": 5432
+        },
+        "test": {
+            "host": "localhost",
+            "database": "ratings_test",
+            "port": 5432
+        }
     }
 }
