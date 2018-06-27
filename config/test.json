@@ -4,7 +4,7 @@
     },
     "postgres": {
         "host": "localhost",
-        "database": "ratings",
+        "database": "ratings_test",
         "port": 5432
     }
 }
