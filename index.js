@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const {Pool, Client} = require('pg');
+const {Pool} = require('pg');
 
 const rating = require('./lib/ratings')
 let config = require('./config/development')
@@ -30,10 +30,12 @@ app.get('/login/:userId', function (req, res, next) {
 
     console.log(`GET login attempt, userID: ${userId}`)
 
-    let queryString = `
-        SELECT * FROM users WHERE id = ${userId};
-    `
-    pool.query(queryString, (err, result) => {
+    let query = {
+        text: `SELECT * FROM users WHERE id = $1`,
+        values: [userId]
+    }
+
+    pool.query(query, (err, result) => {
         if (err || result.rows.length === 0) {
             console.error(err || `No tuples returned by query`)
             res.status(404)
@@ -62,12 +64,12 @@ app.post('/rating', function (req, res, next) {
 
     console.log(`POST content rate request from user ${data.userId} for content ${data.contentId} (${data.rating} stars)`)
 
-    let queryString = `
-        INSERT INTO ratings(user_ID, content_ID, rating)
-            VALUES (${data.userId}, ${data.contentId}, ${data.rating})
-    `
+    let query = {
+        text: `INSERT INTO ratings(user_ID, content_ID, rating) VALUES ($1, $2, $3)`,
+        values: [data.userId, data.contentId, data.rating]
+    }
 
-    pool.query(queryString, (err, result) => {
+    pool.query(query, (err, result) => {
         if (err) {
             console.error(err)
             res.status(404)
@@ -92,11 +94,12 @@ app.get('/rating/:contentId', function (req, res, next) {
 
     console.log(`GET average rating for ${contentId}`)
 
-    let queryString = `
-        SELECT * FROM contents WHERE id = ${contentId}
-    `
+    let query = {
+        text: `SELECT * FROM contents WHERE id = $1`,
+        values: [contentId]
+    }
 
-    pool.query(queryString, (err, result) => {
+    pool.query(query, (err, result) => {
         if (err || result.rows.length === 0) {
             console.error(err)
             res.status(404)

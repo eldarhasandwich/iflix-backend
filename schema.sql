@@ -17,3 +17,6 @@ CREATE TABLE ratings (
     content_ID INT REFERENCES contents(ID),
     rating INT
 );
+
+CREATE INDEX idx_ratings_rating ON ratings USING btree (rating);
+
