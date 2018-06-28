@@ -5,7 +5,7 @@ const cors = require('cors')
 const {Pool} = require('pg');
 
 const rating = require('./lib/ratings')
-let config = require('./config/' + process.env.NODE_ENV || "development")
+let config = require('./config/' + (process.env.NODE_ENV || "development"))
 
 // Database connection
 const pool = new Pool(config.postgres)
